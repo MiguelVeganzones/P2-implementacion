@@ -13,7 +13,7 @@ int main() {
 	m.type = j++;
 	m.PAS = j++;
 
-	for (uint8_t i = 0; i < data_s; ++i) {
+	for (uint8_t i = 0; i < data_size; ++i) {
 		m.data[i] = j++;
 	}
 

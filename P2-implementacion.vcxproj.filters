@@ -22,5 +22,8 @@
     <ClInclude Include="message.h">
       <Filter>Archivos de origen</Filter>
     </ClInclude>
+    <ClInclude Include="entity.h">
+      <Filter>Archivos de origen</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
