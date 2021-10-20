@@ -5,7 +5,7 @@
 int main() {
 
 	message m;
-	uint16_t j = 0;
+	uint8_t j = 0;
 
 	m.destination = j++;
 	m.origin = j++;
@@ -13,19 +13,22 @@ int main() {
 	m.type = j++;
 	m.PAS = j++;
 
-	for (uint8_t i = 0; i < data_size; ++i) {
-		m.data[i] = j++;
+	for (uint8_t i = 0; i < data_size; ++i, ++j) {
+		m.data[i] = j;
 	}
 
-	std::cout << m << "\n\n" << --j << char(10) << (char)j;
+	std::cout << m << "\n\n" << (int)j << " -- " << (char)j << "\n\n";
 
 	uint8_t res = 0;
-	for (uint16_t i = 0; i < 256; ++i) {
-		res ^= i;
+	for (uint16_t i = 1; i < total_msg_size - 1; ++i) {
+		res ^= (uint8_t)i;
 		std::cout << (int)res << std::endl;
 	}
 
-	std::cout << (int)res << std::endl;
+	std::cout << "\n\n";
+	set_redundance(m);
+	std::cout << "red: " << (int)m.redundance;
+	std::cout << "\n" <<(int)res << std::endl <<
 	check_redundance(m);
 
 	return EXIT_SUCCESS;

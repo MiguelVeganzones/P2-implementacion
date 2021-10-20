@@ -77,12 +77,12 @@ bool check_redundance(const message& m) {
 
 std::ostream& operator<<(std::ostream& os, const message& m) {
 	os
-		<< m.destination << " "
-		<< m.origin << " "
-		<< m.longitud << " "
-		<< m.type << " "
-		<< m.PAS << " ";
-	for (char c : m.data) {
+		<< (int)m.destination << " "
+		<< (int)m.origin << " "
+		<< (int)m.longitud << " "
+		<< (int)m.type << " "
+		<< (int)m.PAS << " ";
+	for (unsigned char c : m.data) {
 		os << c << " ";
 	}
 
