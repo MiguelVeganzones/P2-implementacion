@@ -9,7 +9,7 @@ int main() {
 
 	m.destination = j++;
 	m.origin = j++;
-	m.longitud = j++;
+	m.longitude = j++;
 	m.type = j++;
 	m.PAS = j++;
 
