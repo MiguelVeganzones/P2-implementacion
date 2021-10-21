@@ -33,3 +33,36 @@ int main() {
 
 	return EXIT_SUCCESS;
 }
+
+
+
+
+//ignorar
+//Campos con un tamaño especifico de bits
+// 
+//struct A {
+//	unsigned char a : 4; //entero de 4 bits, aunque en memoria ocupe 8
+//	unsigned char b : 5;
+//	A() : a{}, b{} {};
+//};
+//
+//struct B {
+//	unsigned char a; //entero de 8 bits, aunque en memoria ocupe 8
+//	unsigned char b;
+//	B() : a{}, b{} {};
+//};
+//
+//int main() {
+//	std::cout << "Tamaño en bytes de A: " << sizeof(A) << "\nTamaño en bytes de B: " << sizeof(B) << "\n";
+//	int n = 17, i;
+//	A a;
+//	B b;
+//	for (i = 0; i < n; ++i) {
+//		++a.a;
+//		++a.b;
+//		++b.a;
+//		++b.b;
+//	}
+//
+//	std::cout << "A: " << (int)a.a << ", " << (int)a.b << "\nB: " << (int)b.a << ", " << (int)b.b << std::endl;
+//}
