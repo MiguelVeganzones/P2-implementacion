@@ -22,15 +22,15 @@ constexpr uint8_t n_retry = 3; //number of times the message is tried to be rese
 
 struct message {
 	// structure of the message:
-	// | Redundancia | Destino | origen | longitud | type | data |
+	// | Redundance | Destination | origin | length | type | data |
 
 	message() = default;
 
 	unsigned char data[data_size]{};
 	redun_s redundance{}; //redundance field for error checking
-	dest_s destination{}; //final user ID
-	orig_s origin{}; //origin user ID
-	long_s longitude{}; //longitud of the data sent
+	dest_s destination{}; //final user PID
+	orig_s origin{}; //origin user PID
+	long_s longitude{}; //length of the data sent
 	type_s type{}; //type of message, either 0, 1, or 2 (Original, ACK, NAK)
 	PAS_s PAS{};
 	static const total_msg_size_s total_size = total_msg_size;
@@ -88,3 +88,41 @@ std::ostream& operator<<(std::ostream& os, const message& m) {
 
 	return os;
 }
+
+
+//---------------------------------------------------------------------------
+
+//Struct for message queue
+
+struct Messages_queue{
+	// structure of the message:
+	// | Redundancy | Destination | origin | length | type | data |
+
+	message() = default;
+
+	unsigned char data[data_size]{};//Data
+	redun_s redundance{}; //redundance field for error checking
+	dest_s destination{}; //final user PID
+	orig_s origin{}; //origin user PID
+	long_s longitude{}; //length of the data sent
+	type_s type{}; //type of message, either 0, 1, or 2 (Original, ACK, NAK)
+	PAS_s PAS{};
+	static const total_msg_size_s total_size = total_msg_size;
+
+	std::array<uint8_t, total_msg_size> concatenate_message() const;
+
+};
+
+//Struct for memory shared
+
+struct Memory_shared {
+
+	unsigned char data[data_size]{}; //Data
+	redun_s memo_redundance{}; //redundance field for error checking
+	dest_s memo_destination{}; //final user PID
+	orig_s memo_origin{}; //origin user PID
+	long_s memo_longitude{}; //length of the data sent
+	type_s memo_type{}; //type of message, either 0, 1, or 2 (Original, ACK, NAK)
+	PAS_s memo_PAS{};
+
+};
