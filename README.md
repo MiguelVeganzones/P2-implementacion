@@ -1,16 +1,12 @@
+Join proyect between David Redondo and Miguel Veganzones
 
-HAY QUE TRADUCIR TODO ESTO AL INGLES!!!!
+In this practice it's presented a inter process communication between users in a Linux machine.
+To carry out this communication, the user process must use the necessary communication services needed that are provided 
+by the architecture's entities.
 
-Trabajo conjunto entre David Redondo y Miguel Veganzones.
-
-En esta práctica se plantea reaizar la comunicación entre procesos de usuario, en una máquina Linux.
-Para poder llevar a cabo la comunicación, los procesos de usuario han de emplear los servicios de comunicación
-necesarios que les proporciones entidades de la arquitectura.
-
-Entre las entidades A y B se establece un protocolo que permitirá que interactuén intercambiando
-mensajes (PDUs). Asimismo, estas entidades harán uso de una serie de funciones de interfaz con el nivel inferior,
-servicios de comunicación entre procesos (IPC) que proporciona el sistema operativo. Estos servicios se invocan
-mediante llamadas al sistema que permiten la comunicación entre procesos.
+Between entities A and B is stablished a protocol that will let they can interact exchanging messages (PDU's).
+Likewise, these entities will use interfaz functions with the lower level, communication servicies between processes
+(IPC) provided by the OS. These services are invoked through call to system which let inter processes communication.
 
 -----------------------------------------------------------------------------------------------------------------------------
 
