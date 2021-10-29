@@ -2,14 +2,14 @@
 #include "message.h"
 #include <iostream>
 
-int main() {
+int main0() {
 
 	message m;
 	uint8_t j = 0;
 
 	m.destination = j++;
 	m.origin = j++;
-	m.longitude = j++;
+	m.length = j++;
 	m.type = j++;
 	m.PAS = j++;
 
@@ -35,7 +35,21 @@ int main() {
 }
 
 
+int main() {
+	uint8_t t{0};
+	std::vector<std::vector<unsigned char>> v{};
+	input_message(v);
 
+	int i = 0; 
+
+	for (auto& s : v) {
+		message m(s);
+		std::cout << "=================================\nMessage "<<i++<<": \n" << m << "\n========================================\n";
+	}
+
+	std::cout << '\n' << t << std::endl;
+	
+}
 
 //ignorar
 //Campos con un tamaño especifico de bits
