@@ -57,62 +57,97 @@ int main() {
 	if ((interfaz1 = msgget(MKEYQ1, PERMS | IPC_CREAT)) < 0) 
 		err_sys("EntityA: can't make messages queue");
 
-	/*
-	 * Get the shared memory segment and attach it.
-	 * The server must have already created it.
-	 */
-
+	//Get the shared memory segment and attach it.
+	//The server must have already created it.
 	if ((shmid = shmget(SHMKEY, sizeof(struct Memory_shared), 0)) < 0)
 		err_sys("EntityA: can't get shared memory segment");
 
 	//Pointer to memory
-
-	/*
-	 Para hacer uso de la memoria compartida los procesos deben ligar (attach) el segmento de memoria compartida. Esto se hace con la función shmat()
-	 void * shmat (int shmid, void *shmaddr, int shmflg);
-
-     shmaddr es la dirección a la cual la memoria debe ser ligada. Se recomienda especificar 0 (y el sistema elige la mejor dirección).
-     Si shmflg contiene el flag SHM_RDONLY, la memoria es de sólo lectura, en otro caso es lectura y escritura.
-	  
-     Para desligar (detach) la memoria compartida:
-	 int shmdt( void *shmaddr);
-
-     Donde shmaddr es el valor retornado por shmat().
-	
-	*/
-
 	if (( mesg_mem_shared_ptr=(struct Memory_shared*)shmat(shmid, (char*)0, 0)) == (struct Memory_shared*)-1)
 		err_sys("client: can't attach shared memory segment");
 
-	/*
-	 * Open the two semaphores. The server must have created them already.
-	 */
-
-	if ((clisem = sem_open(SEMKEY1)) < 0)
+	//Semaforos
+	if ((sem = semget(234L, 2, 0)) < 0) {
 		err_sys("client: can't open client semaphore");
-
-	if ((servsem = sem_open(SEMKEY2)) < 0)
-		err_sys("client: can't open server semaphore");
+		exit(1);
+	}
 	
-	client();
-
-	/*
-	 * Detach and remove the shared memory segment and
-	 * close the semaphores.
-	 */
-
-	if (shmdt((char*)mesg_mem_shared_ptr) < 0)
-		err_sys("client: can't detach shared memory");
-
-	if (shmctl(shmid, IPC_RMID, (struct shmid_ds*)0) < 0)
-		err_sys("client: can't remove shared memory");
+	EntityA();
 
 
-	sem_close(clisem);	/* will remove the semaphore */
-	sem_close(servsem);	/* will remove the semaphore */
+}
+
+void EntityA()
+{
+
+	/* Mensaje de confirmación para que comprobar correcto funcionamiento */
+	printf("\n\nLa Entidad A se encuentra preparada.");
+
+	// Tenemos que recibir por cola del Usuario 1
+	printf("\nEstado : En espera... ");
+
+	if ((msgrcv(interfaz1, &mesg_cola, sizeof(mesg_Cola) - sizeof(long), 1L, 0)) < 0)
+	{
+		perror("msgrcv");
+		printf("Error al recibir por la cola");
+		exit(1);
+	}
+
+	printf("\nDatos recibidos de usuario 1.");
+	printf("\n");
+
+	//Escribimos en memoria compartida lo recibido por la interfaz
+	printf("\nEscribiendo en memoria compartida...");
+
+	//HAY QUE CAMBIAR ESTO!!!!
+	mesg_ptr->memo_origen = mesg_cola.cola_origen;
+	mesg_ptr->memo_destino = mesg_cola.cola_destino;
+	mesg_ptr->memo_cliente = mesg_cola.cola_cliente;
+	strcpy(mesg_ptr->memo_datos, mesg_cola.cola_datos);
+	printf("\nYa ha escrito en memoria compartida.");
+
+
+	// Se libera el acceso a la memoria
+	set_free_sem(1);
+
+	printf("\n\nLeyendo de la memoria y enviando por cola a Usuario 1....");
+
+	// Lectura de memoria la memoria compartida
+	while (mesg_ptr->memo_final != 1) {
+
+		// Bloqueamos acceso a la memoria, para acceder nosotros
+		take_sem(0);
+
+		// Comprueba el patron y si no es correcto, da error (sale)
+		int patron = mesg_ptr->memo_patron;
+		// Patron que hemos seleccionado 10101010
+		if (patron != 170) {
+			printf("Error: el patron no es correcto\n");
+			exit(EXIT_FAILURE);
+		}
+
+		mesg_cola.cola_origen = mesg_ptr->memo_origen;
+		mesg_cola.cola_destino = mesg_ptr->memo_destino;
+		mesg_cola.cola_sentido = mesg_ptr->memo_destino;
+		strcpy(mesg_cola.cola_datos, mesg_ptr->memo_datos);
+
+		// Enviamos por interfaz, la lectura de la memoria
+
+		msgsnd(interfaz1, &mesg_cola, sizeof(mesg_Cola) - sizeof(long), 0);
+
+
+		if (mesg_ptr->memo_final != 1) {
+			set_free_sem(1);
+		}
+
+	}
+	printf("\nEnviado por la cola a Usuario 1.");
 
 
 
-	exit(0);
+
+
+
+
 
 }
