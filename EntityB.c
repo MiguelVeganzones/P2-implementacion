@@ -6,7 +6,6 @@
 #include	<sys/shm.h>
 
 #include	<sys/sem.h>
-
 #include	"shm.h"
 
 int	shmid, clisem, servsem;	/* shared memory and semaphore IDs */
