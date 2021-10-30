@@ -160,6 +160,7 @@ void input_message(std::vector<std::vector<unsigned char>>& w) {
 //Struct for message queue
 
 struct shared_mem_queue{
+
 	uint8_t msg_id = 0;
 	message messages[mem_shared_size]{};
 
