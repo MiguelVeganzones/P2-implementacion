@@ -8,8 +8,9 @@
 //size of each field
 
 static constexpr uint8_t n = 6; //number of extra fields excluding redundance
-static constexpr uint8_t data_size = 256; //number of cghars per message
+static constexpr uint8_t data_size = 255; //number of cghars per message
 static constexpr uint16_t total_msg_size = data_size + n;
+static constexpr uint8_t mem_shared_size = 3;
 
 typedef uint8_t redun_s;
 typedef uint8_t dest_s;
@@ -158,42 +159,10 @@ void input_message(std::vector<std::vector<unsigned char>>& w) {
 
 //Struct for message queue
 
-struct Messages_queue{
-	// structure of the message:
-	// | Redundancy | Destination | origin | length | type | data |
+struct shared_mem_queue{
+	uint8_t msg_id = 0;
+	message messages[mem_shared_size]{};
 
-	Messages_queue() = default;
-
-	unsigned char data[data_size]{};//Data
-	queue_direction_s queue_direction{};//Indicate the queue direction
-	//redun_s redundance{}; //redundance field for error checking
-	dest_s destination{}; //final user PID
-	orig_s origin{}; //origin user PID
-<<<<<<< HEAD
-	long_s longitude{}; //length of the data sent
-	//type_s type{}; //type of message, either 0, 1, or 2 (Original, ACK, NAK)
-=======
-	long_s length{}; //length of the data sent
-	type_s type{}; //type of message, either 0, 1, or 2 (Original, ACK, NAK)
-	PAS_s PAS{};
->>>>>>> 6209238a89b45c6afae95fc7c3196663884ba904
-	static const total_msg_size_s total_size = total_msg_size;
-
-	std::array<uint8_t, total_msg_size> concatenate_message() const;
-
-};
-
-//Struct for memory shared
-
-struct Memory_shared {
-
-	Memory_shared() = default;
-
-	unsigned char data[data_size]{}; //Data
-	redun_s memo_redundance{}; //redundance field for error checking
-	dest_s memo_destination{}; //final user PID
-	orig_s memo_origin{}; //origin user PID
-	long_s memo_length{}; //length of the data sent
-	type_s memo_type{}; //type of message, either 0, 1, or 2 (Original, ACK, NAK)
-
+	inline void update_msg_id() { msg_id = ++msg_id % mem_shared_size; }
+	
 };
