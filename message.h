@@ -8,7 +8,7 @@
 //size of each field
 
 static constexpr uint8_t n = 6; //number of extra fields excluding redundance
-static constexpr uint8_t data_size = 20; //number of cghars per message
+static constexpr uint8_t data_size = 256; //number of cghars per message
 static constexpr uint16_t total_msg_size = data_size + n;
 
 typedef uint8_t redun_s;
@@ -34,6 +34,18 @@ struct message {
 		}
 		//origin = get_pid();
 		//destination = _destintion;
+		length = v.size();
+		//type = 1;
+		//PAS = PAS; //14 for eco
+	};
+
+	message(std::vector<unsigned char>& v, const int pid_destination) { //add destination and pas input
+		long_s i = 0;
+		for (auto c : v) {
+			data[i++] = c;
+		}
+		//origin = get_pid();
+		destination = pid_destination;
 		length = v.size();
 		//type = 1;
 		//PAS = PAS; //14 for eco
@@ -100,6 +112,7 @@ std::ostream& operator<<(std::ostream& os, const message& m) {
 
 	return os;
 }
+
 void input_message(std::vector<std::vector<unsigned char>>& w) {
 	std::string line;
 	std::vector<std::string> v;
