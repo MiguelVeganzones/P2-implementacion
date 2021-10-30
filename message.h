@@ -5,12 +5,16 @@
 #include <array>
 #include <string>
 #include <vector>
+
+#include <sys/ipc.h>
+#include <sys/msg.h>
 //size of each field
 
 static constexpr uint8_t n = 6; //number of extra fields excluding redundance
 static constexpr uint8_t data_size = 255; //number of cghars per message
 static constexpr uint16_t total_msg_size = data_size + n;
-static constexpr uint8_t mem_shared_size = 3;
+static constexpr uint8_t message_units_queue = 20;
+static constexpr uint16_t queue_block_size = data_size * message_units_queue;
 
 typedef uint8_t redun_s;
 typedef uint8_t dest_s;
@@ -29,17 +33,6 @@ struct message {
 	// | Redundance | Destination | origin | length | type | data |
 
 	message() = default;
-	message(std::vector<unsigned char>& v) { //add destination and pas input
-		long_s i = 0;
-		for (auto c : v) {
-			data[i++] = c;
-		}
-		//origin = get_pid();
-		//destination = _destintion;
-		length = v.size();
-		//type = 1;
-		//PAS = PAS; //14 for eco
-	};
 
 	message(std::vector<unsigned char>& v, const int pid_destination) { //add destination and pas input
 		long_s i = 0;
@@ -156,14 +149,98 @@ void input_message(std::vector<std::vector<unsigned char>>& w) {
 }
 
 //---------------------------------------------------------------------------
+//struct for queue
+struct data_queue {
 
-//Struct for message queue
+	long message_type;
 
-struct shared_mem_queue{
+	PAS_s PAS;
+	orig_s origin;
+	dest_s destination;
 
-	uint8_t msg_id = 0;
-	message messages[mem_shared_size]{};
-
-	inline void update_msg_id() { msg_id = ++msg_id % mem_shared_size; }
-	
+	char data_block[queue_block_size];
+	inline size_t size() { return sizeof(data_queue) - sizeof(long); }
 };
+
+inline void user_send_message(long type, int ID_cola, int PID_user) {
+	data_queue queue;
+	queue.message_type = type;
+
+	dest_s destination;
+	std::cout << "Introduce el PID del usuario de destino\n";
+	std::cin >> destination;
+
+	PAS_s pas;
+	std::cout << "\nIntroduce el tipo de comunicación: \nPara eco: 14\n";
+	std::cin >> queue.PAS;
+
+	if (pas != 14) {
+		exit(EXIT_FAILURE);
+	}
+
+	std::vector<std::vector<unsigned char>> v;
+	input_message(v);
+
+	uint16_t j = 0;
+
+	for (std::vector<unsigned char>& msg_block : v) {
+		if (j >= queue_block_size) { std::cout << "Mensaje demasiado grande\n";  exit(EXIT_FAILURE); }
+		for (unsigned char c : msg_block) {
+			queue.data_block[j++] = c;
+		}
+	}
+
+	msgsnd(ID_cola, (data_queue*)&queue, queue.size(), PID_user, 1L);
+}
+
+inline data_queue entity_read_queue_msg(int ID_cola) {
+	data_queue queue;
+	msgrcv(ID_cola, (data_queue*)&queue, queue.size(), 1L);
+	return queue;
+}
+
+inline data_queue entity_send_queue_msg(int ID_cola, std::vector<message> messages) {
+	data_queue queue;
+	queue.destination = messages[0].destination;
+	queue.message_type = 2L;
+	queue.origin = messages[0].origin;
+	queue.PAS = messages[0].PAS;
+	uint16_t i = 0; 
+	for (auto& message : messages) {
+		if (i >= queue_block_size) { std::cout << "Message size error\n";  exit(EXIT_FAILURE); }
+		for (auto c : message.data) {
+			queue.data_block[i++] = c;
+		}
+	}
+	msgsnd(ID_cola, (data_queue*)&queue, queue.size(), 2L);
+}
+
+inline void user_read_queue_msg(int ID_cola) {
+	data_queue queue;
+	msgrcv(ID_cola, (data_queue*)&queue, queue.size(), 2L);
+	for (auto c : queue.data_block)std::cout << c;
+}
+
+//Struct for shared memory
+
+struct shared_mem {
+	uint8_t err_count = 0;
+	message _message;
+};
+
+inline void entity_send_to_shared(shared_mem* _shared_mem, message m) {
+	if (m.type == 2) {
+		if (_shared_mem->err_count++ >= n_retry) {
+			std::cout << "Mensaje recibido erroneamente demasiadas veces";
+			exit(EXIT_FAILURE);
+		}
+	}
+	else if (m.type == 1) { _shared_mem->err_count = 0; }
+
+	_shared_mem->_message = m;
+}
+
+inline message entity_read_from_shared(shared_mem* _shared_mem) {
+	return _shared_mem->_message;
+}
+
