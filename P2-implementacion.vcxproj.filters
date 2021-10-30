@@ -17,12 +17,30 @@
     <ClCompile Include="main.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="EntityA.c">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityB.c">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="User1.c">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="semaph.c">
+      <Filter>Archivos de recursos</Filter>
+    </ClCompile>
+    <ClCompile Include="error.c">
+      <Filter>Archivos de recursos</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="message.h">
       <Filter>Archivos de origen</Filter>
     </ClInclude>
     <ClInclude Include="entity.h">
+      <Filter>Archivos de origen</Filter>
+    </ClInclude>
+    <ClInclude Include="msgq.h">
       <Filter>Archivos de origen</Filter>
     </ClInclude>
   </ItemGroup>
