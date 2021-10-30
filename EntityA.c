@@ -14,7 +14,7 @@
 //Defining the instances of the created structured and the identifiers
 
 //struct Messages_queue* mesg_queue_ptr; 
-struct Memory_shared  *mesg_mem_shared_ptr;//ptr to message structure, which is in the shared memory segment 
+struct shared_men  *mesg_mem_shared_ptr;//ptr to message structure, which is in the shared memory segment 
 
 int	shmid, clisem, servsem;	/* shared memory and semaphore IDs */
 	
@@ -54,32 +54,35 @@ int main() {
 	int interfaz1;
 
 	// Making messages queue for user1
-	if ((interfaz1 = msgget(MKEYQ1, PERMS | IPC_CREAT)) < 0) 
-		err_sys("EntityA: can't make messages queue");
-
+	if ((interfaz1 = msgget(MKEYQ1, PERMS | IPC_CREAT)) < 0) {
+        perror("EntityA: can't make messages queue");
+		exit(1);
+	}
+		
 	//Get the shared memory segment and attach it.
 	//The server must have already created it.
-	if ((shmid = shmget(SHMKEY, sizeof(struct Memory_shared), 0)) < 0)
-		err_sys("EntityA: can't get shared memory segment");
+	if ((shmid = shmget(SHMKEY, sizeof(struct shared_mem), 0)) < 0) {
+		perror("EntityA: can't get shared memory segment");
+		exit(1);
+	}
 
 	//Pointer to memory
-	if (( mesg_mem_shared_ptr=(struct Memory_shared*)shmat(shmid, (char*)0, 0)) == (struct Memory_shared*)-1)
-		err_sys("client: can't attach shared memory segment");
+	if ((mesg_mem_shared_ptr = (struct shared_mem*)shmat(shmid, (char*)0, 0)) == (struct shared_mem*)-1) {
+		perror("client: can't attach shared memory segment");
+		exit(1);
+	}
 
 	//Semaforos
 	if ((sem = semget(234L, 2, 0)) < 0) {
-		err_sys("client: can't open client semaphore");
+		perror("client: can't open client semaphore");
 		exit(1);
 	}
-	
 	EntityA();
-
-
+	EntityA();
 }
 
 void EntityA()
 {
-
 	/* Mensaje de confirmación para que comprobar correcto funcionamiento */
 	printf("\n\nLa Entidad A se encuentra preparada.");
 
@@ -142,12 +145,5 @@ void EntityA()
 
 	}
 	printf("\nEnviado por la cola a Usuario 1.");
-
-
-
-
-
-
-
 
 }

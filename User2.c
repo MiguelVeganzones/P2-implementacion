@@ -7,7 +7,7 @@
 #include "msgq.h"
 
 //Definimos la instancia de la estructura creada en msg.h
-struct Messages_queue Messages_queue;
+struct data_queue data_queue;
 
 void main()
 {
@@ -22,7 +22,7 @@ void main()
 	}
 
 	// Sentido Entidad 2 -> Usuario 2
-	Messages_queue.queue_direction = getpid();
+	//data_queue.queue_direction = getpid();
 
 	//Mostramos el pid servidos para que sepamos a que servidor conectarnos
 	printf("El pid del usuario 2 es: %d", getpid());
@@ -30,17 +30,17 @@ void main()
 	while (1) {
 		// Esperaremos a que recibamos datos
 		printf("\n\nEsperando...");
-		msgrcv(interfaz2, (Messages_queue*)&Messages_queue, sizeof(Messages_queue) - sizeof(long), (long)getpid(), 0);
+		msgrcv(interfaz2, (data_queue*)&data_queue, sizeof(data_queue) - sizeof(long), (long)getpid(), 0);
 		printf("\n\nDatos recibidos de entidad B.");
 
 		//Tras recibir, invertimos la cola para enviar
-		Messages_queue.queue_direction = Messages_queue.origin;
-		Messages_queue.origin = Messages_queue.destination;
-		Messages_queue.destination = Messages_queue.queue_direction;
-		Messages_queue.queue_direction = 2L;
+		data_queue.queue_direction = data_queue.origin;
+		data_queue.origin = data_queue.destination;
+		data_queue.destination = data_queue.queue_direction;
+		data_queue.queue_direction = 2L;
 
 		// Enviaremos los datos y mostramos en que modo estamos
-		msgsnd(interfaz2, (Messages_queue*)&Messages_queue, sizeof(Messages_queue) - sizeof(long), 0);
+		msgsnd(interfaz2, (data_queue*)&data_queue, sizeof(data_queue) - sizeof(long), 0);
 		printf("\nDatos enviados a la entidad B.");
 
 		//Ponemos el flag a 1

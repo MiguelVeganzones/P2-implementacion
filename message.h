@@ -10,6 +10,7 @@
 #include <sys/msg.h>
 //size of each field
 
+//size of each field
 static constexpr uint8_t n = 6; //number of extra fields excluding redundance
 static constexpr uint8_t data_size = 255; //number of cghars per message
 static constexpr uint16_t total_msg_size = data_size + n;
@@ -52,7 +53,7 @@ struct message {
 	orig_s origin{};       //origin user PID
 	long_s length{};      //length of the data sent
 	type_s type{};       //type of message, either 0, 1, or 2 (Original, ACK, NAK)
-	PAS_s PAS{};        //type of comunication, eco or tf. Only eco will be impemented
+	PAS_s PAS{};        //type of comunication, eco or tf. Only eco will be implemented
 	static const total_msg_size_s total_size = total_msg_size;
 
 	std::array<uint8_t, total_msg_size> concatenate_message() const;
