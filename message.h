@@ -18,6 +18,7 @@ typedef uint8_t long_s;
 typedef uint8_t type_s;
 typedef uint8_t PAS_s;
 typedef uint16_t total_msg_size_s;
+typedef long queue_direction_s;
 
 //global constants
 constexpr uint8_t n_retry = 3; //number of times the message is tried to be resent in case of error 
@@ -164,12 +165,18 @@ struct Messages_queue{
 	Messages_queue() = default;
 
 	unsigned char data[data_size]{};//Data
-	redun_s redundance{}; //redundance field for error checking
+	queue_direction_s queue_direction{};//Indicate the queue direction
+	//redun_s redundance{}; //redundance field for error checking
 	dest_s destination{}; //final user PID
 	orig_s origin{}; //origin user PID
+<<<<<<< HEAD
+	long_s longitude{}; //length of the data sent
+	//type_s type{}; //type of message, either 0, 1, or 2 (Original, ACK, NAK)
+=======
 	long_s length{}; //length of the data sent
 	type_s type{}; //type of message, either 0, 1, or 2 (Original, ACK, NAK)
 	PAS_s PAS{};
+>>>>>>> 6209238a89b45c6afae95fc7c3196663884ba904
 	static const total_msg_size_s total_size = total_msg_size;
 
 	std::array<uint8_t, total_msg_size> concatenate_message() const;
@@ -180,12 +187,13 @@ struct Messages_queue{
 
 struct Memory_shared {
 
+	Memory_shared() = default;
+
 	unsigned char data[data_size]{}; //Data
 	redun_s memo_redundance{}; //redundance field for error checking
 	dest_s memo_destination{}; //final user PID
 	orig_s memo_origin{}; //origin user PID
 	long_s memo_length{}; //length of the data sent
 	type_s memo_type{}; //type of message, either 0, 1, or 2 (Original, ACK, NAK)
-	PAS_s memo_PAS{};
 
 };
