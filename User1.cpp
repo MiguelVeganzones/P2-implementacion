@@ -7,13 +7,8 @@
 
 
 //We define the structure instance created in message.h
-
 struct data_queue data_queue;
 
-/*getpid devuelve el identificador de proceso del proceso actual. (Esto es usado normalmente
-	   por rutinas que generan nombres únicos de  ficheros  temporales.)   getppid  devuelve  el
-	   identificador de proceso del padre del proceso actual.
-*/
 
 void main(int comando, char* comando_p[])
 {
@@ -28,6 +23,11 @@ void main(int comando, char* comando_p[])
 	}	
 	
 	//Determinamos el PID del usuario de origen
+	// 
+	//getpid devuelve el identificador de proceso del proceso actual. (Esto es usado normalmente
+	//por rutinas que generan nombres únicos de  ficheros  temporales.)   getppid  devuelve  el
+	//identificador de proceso del padre del proceso actual.
+
 	data_queue.origin = getpid();
 	//Escribimos y enviamos el mensaje a la cola de mensajes
 	user_send_message(0, interfaz1, data_queue.origin);
@@ -36,7 +36,8 @@ void main(int comando, char* comando_p[])
 	printf("\nEsperando mensaje...");
 	user_read_queue_msg(interfaz1);
 
-
+	//Finalizacion del programa
+	exit(EXIT_SUCCESS);
 }
 
 
