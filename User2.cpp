@@ -16,37 +16,21 @@ void main()
 	int interfaz2;
 
 	//Conectamos a la cola
-	if ((interfaz2 = msgget(567L, 0)) < 0) {
+	if ((interfaz2 = msgget(MKEYQ2, 0)) < 0) {
 		perror("El Usuario 2 no ha podido conectarse a la cola 2");
 		exit(EXIT_FAILURE);
 	}
 
-	// Sentido Entidad 2 -> Usuario 2
-	//data_queue.queue_direction = getpid();
-
-	//Mostramos el pid servidos para que sepamos a que servidor conectarnos
+	//Mostramos el PID del usuario 2 por qu elo va asolicitar el usuario 1
 	printf("El pid del usuario 2 es: %d", getpid());
 
-	while (1) {
-		// Esperaremos a que recibamos datos
-		printf("\n\nEsperando...");
-		msgrcv(interfaz2, (data_queue*)&data_queue, sizeof(data_queue) - sizeof(long), (long)getpid(), 0);
-		printf("\n\nDatos recibidos de entidad B.");
+	// Esperaremos a que recibamos datos
+	printf("\n\nEsperando...");
+	user_read_queue_msg(interfaz2);
 
-		//Tras recibir, invertimos la cola para enviar
-		data_queue.queue_direction = data_queue.origin;
-		data_queue.origin = data_queue.destination;
-		data_queue.destination = data_queue.queue_direction;
-		data_queue.queue_direction = 2L;
+	//Finalizamos el programa user2
+	exit(EXIT_SUCCESS);
 
-		// Enviaremos los datos y mostramos en que modo estamos
-		msgsnd(interfaz2, (data_queue*)&data_queue, sizeof(data_queue) - sizeof(long), 0);
-		printf("\nDatos enviados a la entidad B.");
 
-		//Ponemos el flag a 1
-		//mesg_cola.cola_final = 1;
-		//strcpy(mesg_cola.cola_datos, "");
-		//msgsnd(interfaz2, (mesg_Cola*)&mesg_cola, sizeof(mesg_Cola) - sizeof(long), 0);
 
-	}
 }
