@@ -3,12 +3,12 @@
 #include	<stdlib.h>
 #include	<string.h>
 #include	<sys/types.h>
-//#include	<sys/ipc.h>
-//#include	<sys/shm_id.h>
+#include	<sys/ipc.h>
+#include	<sys/shm_id.h>
 #include	"message.h"
 #include	"msgq.h"
 
-//#include	<sys/sem.h>
+#include	<sys/sem.h>
 
 
 // Variable para la memoria compartida

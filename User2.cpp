@@ -13,10 +13,10 @@ void main()
 {
 
 	//Declaramos una variable para guardar el ID
-	int interfaz2;
+	int id_cola2;
 
 	//Conectamos a la cola
-	if ((interfaz2 = msgget(MKEYQ2, 0)) < 0) {
+	if ((id_cola2 = msgget(MKEYQ2, 0)) < 0) {
 		perror("El Usuario 2 no ha podido conectarse a la cola 2");
 		exit(EXIT_FAILURE);
 	}
@@ -26,11 +26,9 @@ void main()
 
 	// Esperaremos a que recibamos datos
 	printf("\n\nEsperando...");
-	user_read_queue_msg(interfaz2);
+	user_read_queue_msg(id_cola2);
 
 	//Finalizamos el programa user2
 	exit(EXIT_SUCCESS);
-
-
 
 }

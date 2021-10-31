@@ -14,10 +14,10 @@ void main(int comando, char* comando_p[])
 {
 
 	//Declaramos una variable para guardar el ID
-	int interfaz1;
+	int id_cola1;
 
 	// Primeramente hay que conectarse a la cola creada por la Entidad B
-	if ((interfaz1 = msgget(MKEYQ1, 0)) < 0) {
+	if ((id_cola1 = msgget(MKEYQ1, 0)) < 0) {
 		printf("El Usuario 1 no se ha podido conectar a la cola 1");
 		exit(EXIT_FAILURE);
 	}	
@@ -30,11 +30,11 @@ void main(int comando, char* comando_p[])
 
 	data_queue.origin = getpid();
 	//Escribimos y enviamos el mensaje a la cola de mensajes
-	user_send_message(0, interfaz1, data_queue.origin);
+	user_send_message(0, id_cola1, data_queue.origin);
 
 	// Leemos mensaje de respuesta 
 	printf("\nEsperando mensaje...");
-	user_read_queue_msg(interfaz1);
+	user_read_queue_msg(id_cola1);
 
 	//Finalizacion del programa
 	exit(EXIT_SUCCESS);

@@ -47,7 +47,7 @@ void set_free_sem(int num) {
 	operasem.sem_op = 1; //liberate the semaphore  
 	operasem.sem_flg = 0;
 	if (semop(sem1, &operasem, 1) < 0) {
-		
+		perror("semop");
 	}
 }
 
@@ -57,7 +57,7 @@ void take_sem(int num) {
 	operasem.sem_op = -1; //take the semaphore
 	operasem.sem_flg = 0;
 	if (semop(sem1, &operasem, 1) < 0) {
-		
+		perror("semop");
 	}
 }
 
@@ -86,11 +86,10 @@ int main() {
 	}
 
 	//Semaforos
-	if ((sem1 = semget(SHMKEY, 2, 0)) < 0) {
+	if ((sem1 = semget(SEMKEY, 2, 0)) < 0) {
 		perror("client: can't open client semaphore");
 		exit(1);
 	}
-	EntityA();
 	EntityA();
 }
 
@@ -101,62 +100,32 @@ void EntityA()
 
 	// Tenemos que recibir por cola del Usuario 1
 	printf("\nEstado : En espera... ");
-
-	if ((msgrcv(id_cola1, &data_queue, sizeof(data_queue) - sizeof(long), 1L, 0)) < 0)
-	{
-		perror("msgrcv");
-		printf("Error al recibir por la cola");
-		exit(1);
-	}
-
+	auto messages=entity_read_queue_msg(id_cola1);
 	printf("\nDatos recibidos de usuario 1.");
 	printf("\n");
 
 	//Escribimos en memoria compartida lo recibido por la interfaz
 	printf("\nEscribiendo en memoria compartida...");
 
-	//HAY QUE CAMBIAR ESTO!!!!
-	mesg_ptr->memo_origen = mesg_cola.cola_origen;
-	mesg_ptr->memo_destino = mesg_cola.cola_destino;
-	mesg_ptr->memo_cliente = mesg_cola.cola_cliente;
-	strcpy(mesg_ptr->memo_datos, mesg_cola.cola_datos);
-	printf("\nYa ha escrito en memoria compartida.");
+	for (auto& m : messages)
+	{
 
+	}
+	entity_send_to_shared(mesg_mem_shared_ptr,);
+	printf("\nYa ha escrito en memoria compartida.");
 
 	// Se libera el acceso a la memoria
 	set_free_sem(1);
 
 	printf("\n\nLeyendo de la memoria y enviando por cola a Usuario 1....");
 
-	// Lectura de memoria la memoria compartida
-	while (mesg_ptr->memo_final != 1) {
+	take_sem(0);
 
-		// Bloqueamos acceso a la memoria, para acceder nosotros
-		take_sem(0);
+	entity_read_from_shared(mesg_mem_shared_ptr);
 
-		// Comprueba el patron y si no es correcto, da error (sale)
-		int patron = mesg_ptr->memo_patron;
-		// Patron que hemos seleccionado 10101010
-		if (patron != 170) {
-			printf("Error: el patron no es correcto\n");
-			exit(EXIT_FAILURE);
-		}
-
-		mesg_cola.cola_origen = mesg_ptr->memo_origen;
-		mesg_cola.cola_destino = mesg_ptr->memo_destino;
-		mesg_cola.cola_sentido = mesg_ptr->memo_destino;
-		strcpy(mesg_cola.cola_datos, mesg_ptr->memo_datos);
-
-		// Enviamos por interfaz, la lectura de la memoria
-
-		msgsnd(id_cola1, &data_queue, sizeof(data_queue) - sizeof(long), 0);
+	set_redundance();
 
 
-		if (mesg_ptr->memo_final != 1) {
-			set_free_sem(1);
-		}
 
-	}
-	printf("\nEnviado por la cola a Usuario 1.");
 
 }
