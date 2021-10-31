@@ -39,7 +39,7 @@ struct message {
 	message() = default;
 
 	message(dest_s _destination, orig_s _origin, long_s _length, type_s _type, PAS_s _PAS) :
-		destination{ _destination }, origin{ _origin }, length{ _lenght }, type{ _type }, PAS{ _PAS }
+		destination{ _destination }, origin{ _origin }, length{ _length }, type{ _type }, PAS{ _PAS }
 	{
 
 	}
@@ -160,19 +160,19 @@ struct data_queue {
 	inline size_t size() { return sizeof(data_queue) - sizeof(long); }
 };
 
-inline void user_send_message(long type, int ID_cola, int PID_user) {
+
+//interfaz usuario-entidad
+inline void user_send_message(int ID_cola, int PID_user) {
 	data_queue queue;
-	queue.message_type = type;
+	queue.message_type = 1L;
 
-	dest_s destination;
 	std::cout << "Introduce el PID del usuario de destino\n";
-	std::cin >> destination;
+	std::cin >> queue.destination;
 
-	PAS_s pas;
-	std::cout << "\nIntroduce el tipo de comunicaci?n: \nPara eco: 14\n";
+	std::cout << "\nIntroduce el tipo de comunicacion: \nPara eco: 14\n";
 	std::cin >> queue.PAS;
 
-	if (pas != 14) {
+	if (queue.PAS != 14) {
 		exit(EXIT_FAILURE);
 	}
 	queue.origin = PID_user;
@@ -190,13 +190,23 @@ inline std::vector<message> entity_read_queue_msg(int ID_cola) {
 	int16_t i = 0;
 
 	for (auto c : queue.data_block) {
-		if (i % data_size == 0)ret.push_back(message());
-
-		ret[i / data_size].data[i % data_size] = c;
+		if (i % data_size == 0) {
+			ret.push_back(message());
+		}
+		ret[i / data_size].data[i++ % data_size] = c;
 	}
+	if (i % data_size == 0)ret.push_back(message()); //add one last message if the last messaeg was filled
+	for (auto& m : ret) {
+		m.length = data_size;
+		m.PAS = queue.PAS;
+		m.origin = queue.origin;
+		m.destination = queue.destination;
+	}
+	ret.end()->length = i % data_size; //set length of last message
+	return ret;
 }
 
-inline void entity_send_queue_msg(int ID_cola, std::vector<message> messages) {
+inline void entity_send_queue_msg(int ID_cola, const std::vector<message>& messages) {
 	data_queue queue;
 	queue.destination = messages[0].destination;
 	queue.message_type = 2L;
