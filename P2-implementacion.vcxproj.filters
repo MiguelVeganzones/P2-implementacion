@@ -11,33 +11,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="message.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="EntityA.c">
+    <ClCompile Include="EntityB.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="EntityB.c">
+    <ClCompile Include="User1.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="User1.c">
+    <ClCompile Include="User2.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="semaph.c">
-      <Filter>Archivos de recursos</Filter>
-    </ClCompile>
-    <ClCompile Include="error.c">
-      <Filter>Archivos de recursos</Filter>
+    <ClCompile Include="EntityA.cpp">
+      <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="message.h">
-      <Filter>Archivos de origen</Filter>
-    </ClInclude>
-    <ClInclude Include="entity.h">
       <Filter>Archivos de origen</Filter>
     </ClInclude>
     <ClInclude Include="msgq.h">

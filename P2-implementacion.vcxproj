@@ -139,16 +139,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="EntityA.c" />
-    <ClCompile Include="EntityB.c" />
-    <ClCompile Include="error.c" />
+    <ClCompile Include="EntityA.cpp" />
+    <ClCompile Include="EntityB.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="message.cpp" />
-    <ClCompile Include="semaph.c" />
-    <ClCompile Include="User1.c" />
+    <ClCompile Include="User1.cpp" />
+    <ClCompile Include="User2.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="entity.h" />
     <ClInclude Include="message.h" />
     <ClInclude Include="msgq.h" />
   </ItemGroup>

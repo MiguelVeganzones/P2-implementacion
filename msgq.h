@@ -6,9 +6,11 @@ We had used the keys and permissions given in CV examples.
 Authors: David Redondo and Miguel Veganzones
 */
 
-#include <sys/ipc.h>
-#include <sys/msg.h>
+//#include <sys/ipc.h>
+//#include <sys/msg.h>
 
+
+int ftok(void*, char) {}
 
 #define PERMS 0666  				// Permissions
 

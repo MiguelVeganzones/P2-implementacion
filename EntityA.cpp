@@ -2,38 +2,51 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/sem.h>
+//#include <sys/ipc.h>
+//#include <sys/shm.h>
+//#include <sys/sem.h>
 
 #include "message.h"
 #include "msgq.h"
 
+#define IPC_CREAT 1;
 
 
 //Defining the instances of the created structured and the identifiers
 
 //struct Messages_queue* mesg_queue_ptr; 
-struct shared_men  *mesg_mem_shared_ptr;//ptr to message structure, which is in the shared memory segment 
 
-int	shmid, clisem, servsem;	/* shared memory and semaphore IDs */
+shared_mem  *mesg_mem_shared_ptr;//ptr to message structure, which is in the shared memory segment 
+
+int	shm_id, sem1, sem2;	/* shared memory and semaphore IDs */
 	
 //Semaphore structure (explain what means each line)
 
 union semun {
 	int val;
 	struct semid_ds* buf;
-	ushort* array;
+	unsigned short* array;
 } semctl_arg;
 
 //Semaphore functions
+
+struct sembuf {
+	int sem_num;
+	int sem_op;
+	int sem_flg;
+
+};
+
+int semop(int, void*, int){}
+int msgget(int, int) {}
+int shmget(int, size_t, long) {}
 
 void set_free_sem(int num) {
 	struct sembuf operasem;
 	operasem.sem_num = num;
 	operasem.sem_op = 1; //liberate the semaphore  
 	operasem.sem_flg = 0;
-	if (semop(sem, &operasem, 1) < 0) {
+	if (semop(sem1, &operasem, 1) < 0) {
 		
 	}
 }
@@ -43,7 +56,7 @@ void take_sem(int num) {
 	operasem.sem_num = num;
 	operasem.sem_op = -1; //take the semaphore
 	operasem.sem_flg = 0;
-	if (semop(sem, &operasem, 1) < 0) {
+	if (semop(sem1, &operasem, 1) < 0) {
 		
 	}
 }
@@ -51,29 +64,29 @@ void take_sem(int num) {
 int main() {
 
 	//Declaramos una variable para guardar el ID de la cola
-	int interfaz1;
+	int id_cola1;
 
 	// Making messages queue for user1
-	if ((interfaz1 = msgget(MKEYQ1, PERMS | IPC_CREAT)) < 0) {
+	if ((id_cola1 = msgget(MKEYQ1, PERMS | IPC_CREAT)) < 0) {
         perror("EntityA: can't make messages queue");
 		exit(1);
 	}
 		
 	//Get the shared memory segment and attach it.
 	//The server must have already created it.
-	if ((shmid = shmget(SHMKEY, sizeof(struct shared_mem), 0)) < 0) {
+	if ((shm_id = shmget(SHMKEY, sizeof(shared_mem), 0)) < 0) {
 		perror("EntityA: can't get shared memory segment");
 		exit(1);
 	}
 
 	//Pointer to memory
-	if ((mesg_mem_shared_ptr = (struct shared_mem*)shmat(shmid, (char*)0, 0)) == (struct shared_mem*)-1) {
+	if ((mesg_mem_shared_ptr = (shared_mem*)shmat(shm_id, (char*)0, 0)) == (struct shared_mem*)-1) {
 		perror("client: can't attach shared memory segment");
 		exit(1);
 	}
 
 	//Semaforos
-	if ((sem = semget(234L, 2, 0)) < 0) {
+	if ((sem1 = semget(SHMKEY, 2, 0)) < 0) {
 		perror("client: can't open client semaphore");
 		exit(1);
 	}
@@ -89,7 +102,7 @@ void EntityA()
 	// Tenemos que recibir por cola del Usuario 1
 	printf("\nEstado : En espera... ");
 
-	if ((msgrcv(interfaz1, &mesg_cola, sizeof(mesg_Cola) - sizeof(long), 1L, 0)) < 0)
+	if ((msgrcv(id_cola1, &data_queue, sizeof(data_queue) - sizeof(long), 1L, 0)) < 0)
 	{
 		perror("msgrcv");
 		printf("Error al recibir por la cola");
@@ -136,7 +149,7 @@ void EntityA()
 
 		// Enviamos por interfaz, la lectura de la memoria
 
-		msgsnd(interfaz1, &mesg_cola, sizeof(mesg_Cola) - sizeof(long), 0);
+		msgsnd(id_cola1, &data_queue, sizeof(data_queue) - sizeof(long), 0);
 
 
 		if (mesg_ptr->memo_final != 1) {

@@ -1,16 +1,19 @@
 #pragma once
 #include <iostream>
 #include <cmath>
-#include <assert.h>
-#include <array>
 #include <string>
 #include <vector>
 
-#include <sys/ipc.h>
-#include <sys/msg.h>
+//#include <sys/ipc.h>
+//#include <sys/msg.h>
+
 //size of each field
 
 //size of each field
+
+int msgrcv(int a, void* b, size_t c, long d) { return 1; }
+int msgsnd(int a, void* b, size_t c, long d) { return 1; }
+
 static constexpr uint8_t n = 6; //number of extra fields excluding redundance
 static constexpr uint8_t data_size = 255; //number of cghars per message
 static constexpr uint16_t total_msg_size = data_size + n;
@@ -35,6 +38,12 @@ struct message {
 
 	message() = default;
 
+	message(dest_s _destination, orig_s _origin, long_s _length, type_s _type, PAS_s _PAS) :
+		destination{ _destination }, origin{ _origin }, length{ _lenght }, type{ _type }, PAS{ _PAS }
+	{
+
+	}
+
 	message(std::vector<unsigned char>& v, const int pid_destination) { //add destination and pas input
 		long_s i = 0;
 		for (auto c : v) {
@@ -55,25 +64,7 @@ struct message {
 	type_s type{};       //type of message, either 0, 1, or 2 (Original, ACK, NAK)
 	PAS_s PAS{};        //type of comunication, eco or tf. Only eco will be implemented
 	static const total_msg_size_s total_size = total_msg_size;
-
-	std::array<uint8_t, total_msg_size> concatenate_message() const;
 };
-
-std::array<uint8_t, total_msg_size> message::concatenate_message() const {	
-	std::array<uint8_t, total_msg_size> __m;// one block of memory that will contain the full
-							 
-	unsigned int i = 0;
-	__m[i++] = redundance;
-	__m[i++] = destination;
-	__m[i++] = origin;
-	__m[i++] = length;
-	__m[i++] = type;
-	__m[i++] = PAS;
-	for (uint8_t j = 0; i < total_msg_size; ++i, ++j) {
-		__m[i] = data[j];
-	}
-	return __m;
-}
 
 bool check_destination(const message& m) {
 	return m.destination != 0;
@@ -87,12 +78,20 @@ void set_redundance(message& m) {
 	m.redundance = __xor;
 }
 
-bool check_redundance(const message& m) {	
+bool check_redundance(const message& m) {
 	uint8_t __xor = m.destination xor m.length xor m.origin xor m.PAS xor m.type;
 	for (unsigned int i = 0; i < data_size; ++i) {
 		__xor ^= m.data[i];
 	}
 	return m.redundance == __xor;
+}
+
+message mutate(message m) {
+	message ret;
+	for (auto& c : m.data) {
+		c = toupper(c);
+	}
+	return ret;
 }
 
 std::ostream& operator<<(std::ostream& os, const message& m) {
@@ -109,10 +108,9 @@ std::ostream& operator<<(std::ostream& os, const message& m) {
 	return os;
 }
 
-void input_message(std::vector<std::vector<unsigned char>>& w) {
+void input_message(char* ret, size_t size = queue_block_size) {
 	std::string line;
 	std::vector<std::string> v;
-	w.clear();
 
 	std::cout << "mensaje:\n";
 	bool flag = 0;
@@ -130,7 +128,7 @@ void input_message(std::vector<std::vector<unsigned char>>& w) {
 		}
 		v.push_back(line);
 	}
-	
+
 	unsigned long int total_size = 0;
 	unsigned long int i = 0;
 
@@ -138,13 +136,12 @@ void input_message(std::vector<std::vector<unsigned char>>& w) {
 		total_size += s.size() + 1; //+1 for the '\n' char
 	}
 
-	w.resize(total_size / data_size + 1);
-
+	if (total_size > queue_block_size) { std::cout << "mensaje demasiado grande\n"; exit(EXIT_FAILURE); }
 	for (auto& s : v) {
 		for (unsigned char c : s) {
-			w[i++ / data_size].push_back(c);
+			ret[i++] = c;
 		}
-		w[i++ / data_size].push_back('\n');
+		ret[i++] = '\n';
 	}
 	std::cout << "Total message size: " << total_size << std::endl;
 }
@@ -172,41 +169,40 @@ inline void user_send_message(long type, int ID_cola, int PID_user) {
 	std::cin >> destination;
 
 	PAS_s pas;
-	std::cout << "\nIntroduce el tipo de comunicación: \nPara eco: 14\n";
+	std::cout << "\nIntroduce el tipo de comunicaci?n: \nPara eco: 14\n";
 	std::cin >> queue.PAS;
 
 	if (pas != 14) {
 		exit(EXIT_FAILURE);
 	}
+	queue.origin = PID_user;
+	input_message(queue.data_block);
 
-	std::vector<std::vector<unsigned char>> v;
-	input_message(v);
-
-	uint16_t j = 0;
-
-	for (std::vector<unsigned char>& msg_block : v) {
-		if (j >= queue_block_size) { std::cout << "Mensaje demasiado grande\n";  exit(EXIT_FAILURE); }
-		for (unsigned char c : msg_block) {
-			queue.data_block[j++] = c;
-		}
-	}
-
-	msgsnd(ID_cola, (data_queue*)&queue, queue.size(), PID_user, 1L);
+	msgsnd(ID_cola, (data_queue*)&queue, queue.size(), 1L);
 }
 
-inline data_queue entity_read_queue_msg(int ID_cola) {
+inline std::vector<message> entity_read_queue_msg(int ID_cola) {
 	data_queue queue;
 	msgrcv(ID_cola, (data_queue*)&queue, queue.size(), 1L);
-	return queue;
+
+	std::vector<message> ret;
+
+	int16_t i = 0;
+
+	for (auto c : queue.data_block) {
+		if (i % data_size == 0)ret.push_back(message());
+
+		ret[i / data_size].data[i % data_size] = c;
+	}
 }
 
-inline data_queue entity_send_queue_msg(int ID_cola, std::vector<message> messages) {
+inline void entity_send_queue_msg(int ID_cola, std::vector<message> messages) {
 	data_queue queue;
 	queue.destination = messages[0].destination;
 	queue.message_type = 2L;
 	queue.origin = messages[0].origin;
 	queue.PAS = messages[0].PAS;
-	uint16_t i = 0; 
+	uint16_t i = 0;
 	for (auto& message : messages) {
 		if (i >= queue_block_size) { std::cout << "Message size error\n";  exit(EXIT_FAILURE); }
 		for (auto c : message.data) {
@@ -244,4 +240,3 @@ inline void entity_send_to_shared(shared_mem* _shared_mem, message m) {
 inline message entity_read_from_shared(shared_mem* _shared_mem) {
 	return _shared_mem->_message;
 }
-
