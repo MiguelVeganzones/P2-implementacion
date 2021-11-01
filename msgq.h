@@ -9,7 +9,12 @@ Authors: David Redondo and Miguel Veganzones
 //#include <sys/ipc.h>
 //#include <sys/msg.h>
 
+struct sembuf {
+	int sem_num;
+	int sem_op;
+	int sem_flg;
 
+};
 int ftok(void*, char) {}
 
 #define PERMS 0666  				// Permissions

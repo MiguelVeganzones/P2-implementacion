@@ -14,10 +14,9 @@
 // Variable para la memoria compartida
 static int shm_id;
 //Para los semaforos
-static int sem2;
+static int sem;
 
-struct data_queue data_queue;
-struct shared_mem	*Memory_ptr;		
+struct shared_mem	*mesg_mem_shared_ptr;		
 /* ptr to message structure, which is
 in the shared memory segment */
 
@@ -53,9 +52,6 @@ int id_cola2;
 
 main()
 {	
-	//int id_shared;
-	
-	
 
 	// Se crea la cola con el Usuario 2
 	if ((id_cola2 = msgget(MKEYQ2, 060 | IPC_CREAT)) < 0) {
@@ -63,30 +59,23 @@ main()
 		exit(1);
 	}
 
-	/*/if ((id_shared = SHMKEY) == (key_t)-1)
-	{
-		printf(" Se ha producido un error al crear la llave de la memoria compartida");
-		exit(1);
-	}
-	*/
-	
-
+	//crear la memoria compartida
 	if ((shm_id = shmget(SHMKEY, sizeof(shared_mem), PERMS | IPC_CREAT)) < 0)
 		perror("shmget");
 
-	// Puntero a la memoria
-	if ((Memory_ptr = (shared_mem*)shmat(shm_id, (char*)0, 0)) == (shared_mem*)-1) {
+	// Asociar el puntero a la memoria compartida
+	if ((mesg_mem_shared_ptr = (shared_mem*)shmat(shm_id, (char*)0, 0)) == (shared_mem*)-1) {
 		printf("No se puede asociar el puntero al segmento de memoria compartida");
 		perror("shmat");
 	}
 
 	// Semaforos. Hay dos semaforos
-	if ((sem2 = semget(SEMKEY, 2, PERMS | IPC_CREAT)) < 0) {
+	if ((sem = semget(SEMKEY, 2, PERMS | IPC_CREAT)) < 0) {
 		perror("semget");
 		exit(1);
 	}
 
-	// Inicializaci�n de los semaforos 
+	// Inicializacion de los semaforos 
 	semctl_arg.val = 1;
 	if (semctl(sem, 0, SETVAL, semctl_arg) < 0) {
 		perror("semctl");
@@ -98,81 +87,45 @@ main()
 		exit(1);
 	}
 
-	while(1)
-		entityB();
+	entityB();
 
+	std::cout << "\n\nFin de la comunicacón\n";
 	exit(0);
 }
 
 void entityB()
 {
-	std::vector<message> message_queue;
 	// Mensaje de confirmaci�n para que comprobar correcto funcionamiento 
 	printf("\nLa Entidad B se encuentra preparada.");
 
-	//Bloqueamos acceso a la memoria, para acceder nosotros
-	take_sem(1);
+	//vector de mensajes para mandar a la colad e mensajes
+	std::vector<message> messages;
 
-	// Leemos de la memoria compartida lo que recibiremos de Entidad A
-	printf("\n\nLeyendo de memoria compartida...");
+	while (1) {
+		//Bloqueamos acceso a la memoria, para acceder nosotros
+		take_sem(1);
+		message m = entity_read_from_shared(mesg_mem_shared_ptr);
 
-	//leer memoria compartida
+		if (m.type != 0) { std::cout << "Entidad B ha leido su propio mensaje\n";  exit(EXIT_FAILURE); } //reading its own message
+		if (check_redundance(m)) {
+			auto mutated = mutate(m);
+			mutated.type = 1;
+			messages.push_back(mutated);
 
-	message m = entity_read_from_shared(Memory_ptr);
+			//ack
+			entity_send_to_shared(mesg_mem_shared_ptr, mutated);
+		}
+		else { //nak
+			m.type = 2;
+			entity_send_to_shared(mesg_mem_shared_ptr, m);
+		}
 
-	if(m.type != 0){return;} //reading its own message
+		// Leemos de la memoria compartida lo que recibiremos de Entidad A
+		printf("\n\nLeyendo de memoria compartida...");
+		set_free_sem(1);
 
-	if (check_redundance(m))
-	{
-		m.type = 1; //ACK
-		printf("\n\nEscribiendo en memoria compartida mesaje ACK");
-		entity_send_to_shared(Memory_ptr, mutate(m));
-		meessage_queue.push_back(m);
-		//if last message
-		if(m.lenght != data_size);
-		printf("\nEnviando a Usuario 2...");
-		entity_send_queue_msg(id_cola2, message_queue);
+		if (m.length != data_size) { break; }
 	}
-	else{
-		m.type = 2; //NAK
-		printf("\n\nEscribiendo en memoria compartida mesaje NAK");
-		entity_send_to_shared(Memory_ptr, m)
-		return;
-	}
 
-	set_free_sem(0);
-	
-	printf("\nYa ha escrito en memoria compartida.");
-
-
-	/*
-	if (finish process) {
-		sleep(2);
-		printf("\nSaliendo del proceso...");
-		// Libera memoria
-
-		if (shmdt((char*)mesg_ptr) < 0) {
-			perror("No se puede eliminar la memoria");
-			exit(1);
-		}
-
-		// Se elimina memoria
-		if (shmctl(shm_id, IPC_RMID, NULL) < 0) {
-			perror("No se puede eliminar la memoria");
-			exit(1);
-		}
-
-		/// Se elimina la cola utilizada (cola 2)
-		if (msgctl(interfaz2, IPC_RMID, (struct msqid_ds*)NULL) < 0) {
-			perror("Error");
-			exit(1);
-		}
-
-		// Se eliminan semaforos
-		if (semctl(sem, 2, IPC_RMID, semctl_arg) < 0) {
-			printf("\nNo se ha podido borrar el semaforo\n");
-			exit(1);
-		}
-		exit(0);
-	}*/
+	entity_send_queue_msg(id_cola2, messages);
 }

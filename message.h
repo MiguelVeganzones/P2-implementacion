@@ -201,8 +201,12 @@ inline std::vector<message> entity_read_queue_msg(int ID_cola) {
 		m.PAS = queue.PAS;
 		m.origin = queue.origin;
 		m.destination = queue.destination;
+		m.type = 0;
 	}
 	ret.end()->length = i % data_size; //set length of last message
+
+	for (auto& m : ret) set_redundance(m);
+
 	return ret;
 }
 
