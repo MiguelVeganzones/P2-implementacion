@@ -1,21 +1,13 @@
 /*
 In this file, IPC´s keys and permissions are defined
 
-We had used the keys and permissions given in CV examples.
+We have used the keys and permissions given in the examples provided.
 
 Authors: David Redondo and Miguel Veganzones
 */
 
-//#include <sys/ipc.h>
-//#include <sys/msg.h>
-
-struct sembuf {
-	int sem_num;
-	int sem_op;
-	int sem_flg;
-
-};
-int ftok(void*, char) {}
+#include <sys/ipc.h>
+#include <sys/msg.h>
 
 #define PERMS 0666  				// Permissions
 

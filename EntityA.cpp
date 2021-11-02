@@ -1,10 +1,11 @@
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-//#include <sys/ipc.h>
-//#include <sys/shm.h>
-//#include <sys/sem.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/sem.h>
 
 #include "message.h"
 #include "msgq.h"
@@ -13,8 +14,6 @@
 
 
 //Defining the instances of the created structured and the identifiers
-
-//struct Messages_queue* mesg_queue_ptr; 
 
 shared_mem  *mesg_mem_shared_ptr;//ptr to message structure, which is in the shared memory segment 
 
@@ -30,11 +29,12 @@ union semun {
 
 //Semaphore functions
 
+struct sembuf {
+	int sem_num;
+	int sem_op;
+	int sem_flg;
 
-
-int semop(int, void*, int){}
-int msgget(int, int) {}
-int shmget(int, size_t, long) {}
+};
 
 void set_free_sem(int num) {
 	struct sembuf operasem;
@@ -110,8 +110,11 @@ void EntityA()
 	for (int i = 0; i < messages.size() + 1; ++i)
 	{
 		take_sem(0);
-		
-		if (mesg_mem_shared_ptr->err_count >= 3) { std::cout << "Maximo numero de errores de transmision\n"; exit(EXIT_FAILURE); }
+
+		if (mesg_mem_shared_ptr->err_count >= n_retry) { //si ha habido demasiados errores se envia un mensaje de error al usuario
+			entity_send_queue_msg(id_cola1, { message::error_message(mesg_mem_shared_ptr->_message) });
+			exit(EXIT_FAILURE);
+		}
 
 		if (i != 0) { //not first iter
 			auto read_m = entity_read_from_shared(mesg_mem_shared_ptr); 

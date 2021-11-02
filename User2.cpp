@@ -1,3 +1,4 @@
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,9 +6,9 @@
 //Bibliotecas creadas con las estructuras y las llaves
 #include "msg.h"
 #include "msgq.h"
+#include "message.h"
 
 //Definimos la instancia de la estructura creada en msg.h
-struct data_queue data_queue;
 
 void main()
 {
@@ -16,7 +17,7 @@ void main()
 	int id_cola2;
 
 	//Conectamos a la cola
-	if ((id_cola2 = msgget(MKEYQ2, 0)) < 0) {
+	if ((id_cola2 = msgget(MKEYQ2, 0)) < 0) { //cola bloqueante
 		perror("El Usuario 2 no ha podido conectarse a la cola 2");
 		exit(EXIT_FAILURE);
 	}

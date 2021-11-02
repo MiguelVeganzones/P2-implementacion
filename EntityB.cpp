@@ -26,6 +26,13 @@ union semun {
 	unsigned short int* array;
 } semctl_arg;
 
+struct sembuf {
+	int sem_num;
+	int sem_op;
+	int sem_flg;
+
+};
+
 //Funciones del semaforo
 void set_free_sem(int num) {
 	sembuf operasem;
@@ -52,9 +59,8 @@ int id_cola2;
 
 main()
 {	
-
 	// Se crea la cola con el Usuario 2
-	if ((id_cola2 = msgget(MKEYQ2, 060 | IPC_CREAT)) < 0) {
+	if ((id_cola2 = msgget(MKEYQ2, PERMS | IPC_CREAT)) < 0) {
 		perror("Servidor: No puedo obtener id de la cola");
 		exit(1);
 	}

@@ -1,13 +1,10 @@
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "message.h"
 #include "msgq.h"
-
-
-//We define the structure instance created in message.h
-struct data_queue data_queue;
 
 
 void main(int comando, char* comando_p[])
@@ -17,7 +14,7 @@ void main(int comando, char* comando_p[])
 	int id_cola1;
 
 	// Primeramente hay que conectarse a la cola creada por la Entidad B
-	if ((id_cola1 = msgget(MKEYQ1, 0)) < 0) {
+	if ((id_cola1 = msgget(MKEYQ1, 0)) < 0) { //cola bloqueante
 		printf("El Usuario 1 no se ha podido conectar a la cola 1");
 		exit(EXIT_FAILURE);
 	}	
@@ -28,9 +25,8 @@ void main(int comando, char* comando_p[])
 	//por rutinas que generan nombres únicos de  ficheros  temporales.)   getppid  devuelve  el
 	//identificador de proceso del padre del proceso actual.
 
-	data_queue.origin = getpid();
 	//Escribimos y enviamos el mensaje a la cola de mensajes
-	user_send_message(0, id_cola1, data_queue.origin);
+	user_send_message(0, id_cola1, getpid());
 
 	// Leemos mensaje de respuesta 
 	printf("\nEsperando mensaje...");

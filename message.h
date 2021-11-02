@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-//#include <sys/ipc.h>
-//#include <sys/msg.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 
 //size of each field
 
@@ -64,6 +64,16 @@ struct message {
 	type_s type{};       //type of message, either 0, 1, or 2 (Original, ACK, NAK)
 	PAS_s PAS{};        //type of comunication, eco or tf. Only eco will be implemented
 	static const total_msg_size_s total_size = total_msg_size;
+
+	static constexpr const char* _error_message = "El mensaje no ha podido llegar correctamente a su destino.\n";
+	static message error_message(const message& m) {
+		int i = 0;
+		message _m(m);
+		for (auto iter = _error_message; *iter != 0x00; ++iter) {
+			_m.data[i++] = *iter;
+		}
+		return _m;
+	}
 };
 
 bool check_destination(const message& m) {
