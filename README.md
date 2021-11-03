@@ -17,7 +17,7 @@ First one, run Makefile. Then we are going to execute the rest of files in this 
 First EntidadB -> command to run the file: ./entityB
 Second EntityA -> command to run the file: ./entityA
 Third User2  -> command to run the file: ./user2
-Fourth User1 -> command to run the file: ./user1 PID_user2 m [TF]
+Fourth User1 -> command to run the file: ./user1 
 
 The user 1 is who will let write the character chain, directories,...
 The rest work internally. They will only show some dates on the screen to know how they are working
