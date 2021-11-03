@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-//Bibliotecas creadas con las estructuras y las llaves
+//Bibliotecas creadas con las estructuras y las claves
 #include "msg.h"
 #include "msgq.h"
 #include "message.h"

@@ -18,12 +18,6 @@ void main(int comando, char* comando_p[])
 		printf("El Usuario 1 no se ha podido conectar a la cola 1");
 		exit(EXIT_FAILURE);
 	}	
-	
-	//Determinamos el PID del usuario de origen
-	// 
-	//getpid devuelve el identificador de proceso del proceso actual. (Esto es usado normalmente
-	//por rutinas que generan nombres únicos de  ficheros  temporales.)   getppid  devuelve  el
-	//identificador de proceso del padre del proceso actual.
 
 	//Escribimos y enviamos el mensaje a la cola de mensajes
 	user_send_message(0, id_cola1, getpid());

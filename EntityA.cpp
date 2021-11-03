@@ -19,8 +19,7 @@ shared_mem  *mesg_mem_shared_ptr;//ptr to message structure, which is in the sha
 
 int	shm_id, sem;	/* shared memory and semaphore IDs */
 	
-//Semaphore structure (explain what means each line)
-
+//Semaphore structure 
 union semun {
 	int val;
 	struct semid_ds* buf;
@@ -73,13 +72,13 @@ int main() {
 		exit(1);
 	}
 
-	//Pointer to memory
+	//Associate pointer from virtual memory to physical memory
 	if ((mesg_mem_shared_ptr = (shared_mem*)shmat(shm_id, (char*)0, 0)) == (struct shared_mem*)-1) {
 		perror("client: can't attach shared memory segment");
 		exit(1);
 	}
 
-	//Semaforos
+	//get semaphor ID
 	if ((sem = semget(SEMKEY, 2, 0)) < 0) {
 		perror("client: can't open client semaphore");
 		exit(1);
