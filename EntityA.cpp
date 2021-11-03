@@ -128,7 +128,7 @@ void EntityA()
 			}
 		}
 
-		if (i != messages.size() - 1) { //not last iter
+		if (i != messages.size() ) { //not last iter as we added an extra one to read the response from entity B
 			entity_send_to_shared(mesg_mem_shared_ptr, messages[i]);
 		}
 

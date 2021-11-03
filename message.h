@@ -237,7 +237,7 @@ inline void entity_send_queue_msg(int ID_cola, const std::vector<message>& messa
 }
 
 inline void user_read_queue_msg(int ID_cola) {
-	data_queue queue;
+	data_queue queue; 
 	msgrcv(ID_cola, (data_queue*)&queue, queue.size(), 2L);
 	for (auto c : queue.data_block)std::cout << c;
 }
