@@ -90,7 +90,7 @@ void set_redundance(message& m) {
 
 bool check_redundance(const message& m) {
 	uint8_t __xor = m.destination xor m.length xor m.origin xor m.PAS xor m.type;
-	for (unsigned int i = 0; i < data_size; ++i) {
+	for (unsigned int i = 0; i < data_size; ++i) { //xor each char in the message
 		__xor ^= m.data[i];
 	}
 	return m.redundance == __xor;
